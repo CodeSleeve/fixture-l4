@@ -162,12 +162,21 @@ class Fixture extends Singleton implements \Arrayaccess
 	/**
 	 * Load a only a subset of fixtures from the fixtures folder.
 	 * 
-	 * @param  array $fixtures 
+	 * @param  array $selectedFixtures 
 	 * @return void           
 	 */
-	protected function loadSomeFixtures($fixtures)
+	protected function loadSomeFixtures($selectedFixtures)
 	{
-		# code...
+		$fixtures = glob("$this->fixturesLocation/*.php");
+
+		foreach ($fixtures as $fixture) 
+		{
+		    $tableName = basename($fixture, '.php');
+
+		    if (in_array($tableName, $selectedFixtures)) {
+		    	$this->loadFixture($fixture);
+		    }
+		}
 	}
 
 	/**
