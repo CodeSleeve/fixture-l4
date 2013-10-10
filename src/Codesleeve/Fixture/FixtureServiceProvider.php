@@ -12,6 +12,16 @@ class FixtureServiceProvider extends ServiceProvider {
 	protected $defer = false;
 
 	/**
+	 * Bootstrap the application events.
+	 *
+	 * @return void
+	 */
+	public function boot()
+	{
+		$this->package('codesleeve/fixture');
+	}
+
+	/**
 	 * Register the service provider.
 	 *
 	 * @return void
