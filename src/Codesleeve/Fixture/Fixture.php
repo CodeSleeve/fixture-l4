@@ -138,8 +138,11 @@ class Fixture extends Singleton implements \Arrayaccess
 	 */
 	protected function loadFixtures($fixtures)
 	{
-		if ($fixtures) {
+		if ($fixtures) 
+		{
 			$this->loadSomeFixtures($fixtures);
+
+			return;
 		}
 
 		$this->loadAllFixtures();
@@ -180,7 +183,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	}
 
 	/**
-	 * Load fixture data into the database.
+	 * Load a fixture's data into the database.
 	 * We'll also store it inside the fixtures property for easy
 	 * access as an array element or class property from our tests.
 	 * 
@@ -190,15 +193,56 @@ class Fixture extends Singleton implements \Arrayaccess
 	protected function loadFixture($fixture)
 	{
 		$tableName = basename($fixture, '.php');
+		$model = $this->generateModelName($tableName);
 		$this->tables[] = $tableName;
 		$records = include $fixture;
 		
 		foreach ($records as $recordName => $recordValues) 
 		{
-			$model = $this->generateModelName($tableName);
-			$record = $model::create($recordValues);
+			$record = $this->buildRecord($model, $recordName, $recordValues);
 			$this->fixtures[$tableName][$recordName] = $record;
 		}
+	}
+
+	/**
+	 * Build a fixture record using the passed in values.
+	 * 
+	 * @param  Model $model        
+	 * @param  string $recordName   
+	 * @param  mixed $recordValues 
+	 * @return Model             
+	 */
+	protected function buildRecord($model, $recordName, $recordValues)
+	{
+		$record = new $model;
+
+		foreach ($recordValues as $columnName => $columnValue) 
+		{
+			$camelKey = camel_case($columnName);
+
+			// If a column name exists as a method on the model, we will just assume
+		    // it is a relationship and we'll generate the primary key for it and store 
+			// it as a foreign key on the model.
+			if (method_exists($record, $camelKey))
+			{
+				$foreignKeyName = $record->$camelKey()->getForeignKey();
+				$foreignKeyValue = $this->generateKey($columnValue);
+				$record->$foreignKeyName = $foreignKeyValue;
+
+				continue;
+			}
+			
+			$record->$columnName = $columnValue;
+		}
+
+		// Generate a hash for this record's primary key.  We'll simply hash the name of the 
+		// fixture into an integer value so that related fixtures don't have to rely on
+		// an auto-incremented primary key when creating foreign keys.
+		$primaryKeyName = $record->getKeyName(); 
+		$record->$primaryKeyName = $this->generateKey($recordName);
+		$record->save();
+
+		return $record;
 	}
 
 	/**
@@ -212,4 +256,17 @@ class Fixture extends Singleton implements \Arrayaccess
 		return Str::singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
 	}
 
+	/**
+	 * Generate an integer hash of a string for use as a primary key.
+	 * 
+	 * @param  string $value - This should be the name of the fixture.
+	 * @return integer      
+	 */
+	protected function generateKey($value)
+	{
+		$hash = sha1($value);
+		$integerHash = base_convert($hash, 16, 10);
+		
+		return (int)substr($integerHash, 0, 10);
+	}
 }
