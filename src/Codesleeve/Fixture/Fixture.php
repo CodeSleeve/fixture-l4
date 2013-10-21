@@ -1,6 +1,8 @@
 <?php namespace Codesleeve\Fixture;
 
-use Config, Str;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use DB, Config, Str;
 
 class Fixture extends Singleton implements \Arrayaccess
 {
@@ -51,7 +53,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	public function down()
 	{
 		foreach ($this->tables as $table) {
-			\DB::table($table)->truncate();
+			DB::table($table)->truncate();
 		}
 
 		$this->tables = [];
@@ -225,9 +227,7 @@ class Fixture extends Singleton implements \Arrayaccess
 			// it as a foreign key on the model.
 			if (method_exists($record, $camelKey))
 			{
-				$foreignKeyName = $record->$camelKey()->getForeignKey();
-				$foreignKeyValue = $this->generateKey($columnValue);
-				$record->$foreignKeyName = $foreignKeyValue;
+				$this->insertRelatedRecords($recordName, $record, $camelKey, $columnValue);
 
 				continue;
 			}
@@ -246,6 +246,47 @@ class Fixture extends Singleton implements \Arrayaccess
 	}
 
 	/**
+	 * Insert related records for a fixture.
+	 *
+	 * @param  string $recordName
+	 * @param  Model $record      
+	 * @param  string $camelKey    
+	 * @param  string $columnValue 
+	 * @return void              
+	 */
+	protected function insertRelatedRecords($recordName, $record, $camelKey, $columnValue)
+	{
+		$relation = $record->$camelKey();
+		
+		if ($relation instanceof BelongsTo) 
+		{
+			$foreignKeyName = $relation->getForeignKey();
+			$foreignKeyValue = $this->generateKey($columnValue);
+			$record->$foreignKeyName = $foreignKeyValue;
+
+			return;
+		}
+
+		if ($relation instanceof BelongsToMany) 
+		{
+			$joinTable = $relation->getTable();
+			$this->tables[] = $joinTable;
+			$relatedRecords = explode(',', str_replace(', ', ',', $columnValue));
+			$foreignKeyName = $relation->getForeignKey();
+			$otherKeyName = $relation->getOtherKey();
+			$foreignKeyValue = $this->generateKey($recordName);
+
+			foreach ($relatedRecords as $relatedRecord) 
+			{
+				$otherKeyValue = $this->generateKey($relatedRecord);
+				DB::table($joinTable)->insert([$foreignKeyName => $foreignKeyValue, $otherKeyName => $otherKeyValue]);
+			}
+
+			return;
+		}
+	}
+
+	/**
 	 * Generate the name of table's corresponding model.
 	 * 
 	 * @param  string $tableName 
@@ -257,7 +298,9 @@ class Fixture extends Singleton implements \Arrayaccess
 	}
 
 	/**
-	 * Generate an integer hash of a string for use as a primary key.
+	 * Generate an integer hash of a string.
+	 * We'll use this method to convert a fixture's name into the
+	 * primary key of it's corresponding database table record.
 	 * 
 	 * @param  string $value - This should be the name of the fixture.
 	 * @return integer      
