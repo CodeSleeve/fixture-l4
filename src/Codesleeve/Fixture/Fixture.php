@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use DB, Config, Str;
 
 class Fixture extends Singleton implements \Arrayaccess
 {
@@ -35,11 +34,10 @@ class Fixture extends Singleton implements \Arrayaccess
 	 */
 	public function up($fixtures = [])
 	{
-		$this->fixturesLocation = Config::get('fixture::location');
+		$this->fixturesLocation = $this->app['config']->get('fixture::location');
 
 		if (!is_dir($this->fixturesLocation)) {
-			throw new Exception("Could not find fixtures folder, please make sure $this->fixturesLocation exists", 1);
-			
+			throw new Exceptions\InvalidFixtureLocationException("Could not find fixtures folder, please make sure $this->fixturesLocation exists", 1);
 		}
 
 		$this->loadFixtures($fixtures);
@@ -53,7 +51,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	public function down()
 	{
 		foreach ($this->tables as $table) {
-			DB::table($table)->truncate();
+			$this->app['db']->table($table)->truncate();
 		}
 
 		$this->tables = [];
@@ -279,7 +277,7 @@ class Fixture extends Singleton implements \Arrayaccess
 			foreach ($relatedRecords as $relatedRecord) 
 			{
 				$otherKeyValue = $this->generateKey($relatedRecord);
-				DB::table($joinTable)->insert([$foreignKeyName => $foreignKeyValue, $otherKeyName => $otherKeyValue]);
+				$this->app['db']->table($joinTable)->insert([$foreignKeyName => $foreignKeyValue, $otherKeyName => $otherKeyValue]);
 			}
 
 			return;
@@ -294,7 +292,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	 */
 	protected function generateModelName($tableName)
 	{
-		return Str::singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
+		return $this->app['Str']->singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
 	}
 
 	/**

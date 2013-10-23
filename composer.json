@@ -1,6 +1,8 @@
 {
     "name": "codesleeve/fixture",
-    "description": "",
+    "description": "A simple, easy to use fixture library for Laravel 4",
+    "keywords": ["laravel", "fixture", "test", "database", "seed"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Travis Bennett",
@@ -9,7 +11,11 @@
     ],
     "require": {
         "php": ">=5.3.0",
-        "illuminate/support": "4.0.x"
+        "illuminate/support": "4.0.x",
+        "illuminate/foundation": "4.0.*@dev"
+    },
+    "require-dev": {
+        "mockery/mockery": "dev-master"
     },
     "autoload": {
         "psr-0": {

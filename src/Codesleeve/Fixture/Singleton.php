@@ -1,30 +1,57 @@
 <?php namespace Codesleeve\Fixture;
 
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\App;
+
 class Singleton
 {
+    /**
+     * An instance of the laravel application container.
+     * 
+     * @var Application
+     */
+    protected $app;
+
     /**
      * Returns the *Singleton* instance of this class.
      *
      * @staticvar Singleton $instance The *Singleton* instances of this class.
      *
+     * @param mixed $app
      * @return Singleton The *Singleton* instance.
      */
-    public static function getInstance()
+    public static function getInstance($app = null)
     {
         static $instance = null;
+        
         if (null === $instance) {
-            $instance = new static();
+            $instance = new static($app);
         }
 
         return $instance;
     }
 
     /**
+     * This method provides a way for us to inject app instances
+     * into an already instantiated instance of this singleton.
+     * 
+     * @param Application $app
+     */
+    public function setApp($app)
+    {
+        $this->app = $app;
+    }
+
+    /**
      * Protected constructor to prevent creating a new instance of the
      * *Singleton* via the `new` operator from outside of this class.
+     *
+     * @param mixed $app
+     * @return void
      */
-    protected function __construct()
+    protected function __construct(Application $app = null)
     {
+        $this->app = $app ?: App::make('app');
     }
 
     /**
