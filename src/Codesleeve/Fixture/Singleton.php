@@ -7,6 +7,9 @@ class Singleton
 {
     /**
      * An instance of the laravel application container.
+     * This is a full Illuminate\Foundation\Application instance, which inherits from the Container class.
+     * We can resolve all of our dependencies from it just as we would using the App facade,  
+     * however, we can still use the App facade if preferred.
      * 
      * @var Application
      */
