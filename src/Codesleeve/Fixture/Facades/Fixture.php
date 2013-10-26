@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Facade;
 
-class ClassName extends Facade
+class Fixture extends Facade
 {
 	/**
      * Get the registered name of the component.
