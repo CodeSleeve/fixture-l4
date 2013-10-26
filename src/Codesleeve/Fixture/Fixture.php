@@ -58,56 +58,6 @@ class Fixture extends Singleton implements \Arrayaccess
 		$this->tables = [];
 	}
 
-	/**
-	 * Array access method for setting a fixture.
-	 * 
-	 * @param  string $offset 
-	 * @param  mixed $value  
-	 * @return void         
-	 */
-	public function offsetSet($offset, $value) 
-	{
-        if (is_null($offset)) {
-            $this->fixtures[] = $value;
-        } 
-        else {
-            $this->fixtures[$offset] = $value;
-        }
-    }
-
-    /**
-     * Array access method for determining if a fixture exists.
-     * 
-     * @param  string $offset 
-     * @return void boolean      
-     */
-    public function offsetExists($offset) 
-    {
-        return isset($this->fixtures[$offset]);
-    }
-
-    /**
-     * Array access method for unsetting a fixture.
-     * 	
-     * @param  string $offset 
-     * @return void
-     */
-    public function offsetUnset($offset) 
-    {
-        unset($this->fixtures[$offset]);
-    }
-
-    /**
-     * Array access method for returning a fixture.
-     * 
-     * @param  string $offset
-     * @return mixed
-     */
-    public function offsetGet($offset) 
-    {
-        return array_key_exists($offset, $this->fixtures) ? $this->fixtures[$offset] : null;
-    }
-
     /**
      * Handle dynamic method calls to this class.
      * This allows us to return fixture objects via method invocation.
@@ -126,29 +76,6 @@ class Fixture extends Singleton implements \Arrayaccess
         }
 
         return $fixture;
-    }
-
-    /**
-	 * Magic method for setting a fixture.
-	 * 
-	 * @param  string $name 
-	 * @param  mixed $value  
-	 * @return void         
-	 */
-    public function __set($name, $value)
-    {
-        $this->fixtures[$name] = $value;
-    }
-
-    /**
-     * Magic method for returning a fixture.
-     * 
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return array_key_exists($name, $this->fixtures) ? $this->fixtures[$name] : null;
     }
 
 	/**
