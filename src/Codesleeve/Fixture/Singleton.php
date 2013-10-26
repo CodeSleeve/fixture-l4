@@ -21,7 +21,7 @@ class Singleton
      * An array of configuration options
      * @var Array
      */
-    protected $config = [];
+    protected $config = ['location' => '../fixtures'];
 
     /**
      * Returns the *Singleton* instance of this class.
