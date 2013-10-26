@@ -3,6 +3,7 @@
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 class Fixture extends Singleton implements \Arrayaccess
 {
 	/**
@@ -34,7 +35,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	 */
 	public function up($fixtures = [])
 	{
-		$this->fixturesLocation = $this->app['config']->get('fixture::location');
+		$this->fixturesLocation = $this->config['location'];
 
 		if (!is_dir($this->fixturesLocation)) {
 			throw new Exceptions\InvalidFixtureLocationException("Could not find fixtures folder, please make sure $this->fixturesLocation exists", 1);
@@ -51,7 +52,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	public function down()
 	{
 		foreach ($this->tables as $table) {
-			$this->app['db']->table($table)->truncate();
+			$this->db->table($table)->truncate();
 		}
 
 		$this->tables = [];
@@ -108,26 +109,46 @@ class Fixture extends Singleton implements \Arrayaccess
     }
 
     /**
+     * Handle dynamic method calls to this class.
+     * This allows us to return fixture objects via method invocation.
+     * 
+     * @param  string $name      
+     * @param  array $arguments 
+     * @return mixed            
+     */
+    public function __call($name, $arguments)
+    {
+        $fixture = array_key_exists($name, $this->fixtures) ? $this->fixtures[$name] : null;
+
+        if ($arguments && array_key_exists($arguments[0], $fixture)) 
+        {
+        	return $fixture[$arguments[0]];
+        }
+
+        return $fixture;
+    }
+
+    /**
 	 * Magic method for setting a fixture.
 	 * 
-	 * @param  string $offset 
+	 * @param  string $name 
 	 * @param  mixed $value  
 	 * @return void         
 	 */
-    public function __set($offset, $value)
+    public function __set($name, $value)
     {
-        $this->fixtures[$offset] = $value;
+        $this->fixtures[$name] = $value;
     }
 
     /**
      * Magic method for returning a fixture.
      * 
-     * @param string $offset
+     * @param string $name
      * @return mixed
      */
-    public function __get($offset)
+    public function __get($name)
     {
-        return array_key_exists($offset, $this->fixtures) ? $this->fixtures[$offset] : null;
+        return array_key_exists($name, $this->fixtures) ? $this->fixtures[$name] : null;
     }
 
 	/**
@@ -277,7 +298,7 @@ class Fixture extends Singleton implements \Arrayaccess
 			foreach ($relatedRecords as $relatedRecord) 
 			{
 				$otherKeyValue = $this->generateKey($relatedRecord);
-				$this->app['db']->table($joinTable)->insert([$foreignKeyName => $foreignKeyValue, $otherKeyName => $otherKeyValue]);
+				$this->db->table($joinTable)->insert([$foreignKeyName => $foreignKeyValue, $otherKeyName => $otherKeyValue]);
 			}
 
 			return;
@@ -292,7 +313,7 @@ class Fixture extends Singleton implements \Arrayaccess
 	 */
 	protected function generateModelName($tableName)
 	{
-		return $this->app['Str']->singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
+		return $this->str->singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
 	}
 
 	/**

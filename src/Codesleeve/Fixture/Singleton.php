@@ -1,60 +1,66 @@
 <?php namespace Codesleeve\Fixture;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\App;
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Support\Str;
 
 class Singleton
 {
     /**
-     * An instance of the laravel application container.
-     * This is a full Illuminate\Foundation\Application instance, which inherits from the Container class.
-     * We can resolve all of our dependencies from it just as we would using the App facade,  
-     * however, we can still use the App facade if preferred.
-     * 
-     * @var Application
+     * An instance of Laravel's DatabaseManager class
+     * @var DatabaseManager
      */
-    protected $app;
+    protected $db;
+
+    /**
+     * An instance of Laravel's Str class
+     * @var Str
+     */
+    protected $str;
+
+    /**
+     * An array of configuration options
+     * @var Array
+     */
+    protected $config = [];
 
     /**
      * Returns the *Singleton* instance of this class.
      *
      * @staticvar Singleton $instance The *Singleton* instances of this class.
      *
-     * @param mixed $app
+     * @param DatabaseManager $db
+     * @param Str $str
+     * @param array $config
      * @return Singleton The *Singleton* instance.
      */
-    public static function getInstance($app = null)
+    public static function getInstance(DatabaseManager $db, Str $str, $config = null)
     {
         static $instance = null;
         
         if (null === $instance) {
-            $instance = new static($app);
+            $instance = new static($db, $str, $config);
         }
 
         return $instance;
     }
 
     /**
-     * This method provides a way for us to inject app instances
-     * into an already instantiated instance of this singleton.
-     * 
-     * @param Application $app
-     */
-    public function setApp($app)
-    {
-        $this->app = $app;
-    }
-
-    /**
      * Protected constructor to prevent creating a new instance of the
      * *Singleton* via the `new` operator from outside of this class.
      *
-     * @param mixed $app
+     * @param DatabaseManager $db
+     * @param Str $str
+     * @param array $config
      * @return void
      */
-    protected function __construct(Application $app = null)
+    protected function __construct(DatabaseManager $db, Str $str, $config = null)
     {
-        $this->app = $app ?: App::make('app');
+        $this->db = $db;
+        $this->str = $str;
+
+        if ($config) {
+            $this->config = $config;
+        }
     }
 
     /**

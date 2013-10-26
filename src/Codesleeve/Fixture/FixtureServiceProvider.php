@@ -28,7 +28,10 @@ class FixtureServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app->bind('fixture', function()
+		{
+		    return Fixture::getInstance($this->app['db'], $this->app['Str'], $this->app['config']->get('fixture::config'));
+		});
 	}
 
 	/**
