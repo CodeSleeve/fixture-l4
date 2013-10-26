@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
-class Fixture extends Singleton implements \Arrayaccess
+class Fixture extends Singleton
 {
 	/**
 	 * An array of eloquent collections (one for each loaded fixture).
