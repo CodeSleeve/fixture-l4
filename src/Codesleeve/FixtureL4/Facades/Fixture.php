@@ -1,4 +1,4 @@
-<?php namespace Codesleeve\Fixture\Facades;
+<?php namespace Codesleeve\FixtureL4\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

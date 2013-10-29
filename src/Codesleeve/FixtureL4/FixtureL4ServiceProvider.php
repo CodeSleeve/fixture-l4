@@ -1,8 +1,8 @@
-<?php namespace Codesleeve\Fixture;
+<?php namespace Codesleeve\FixtureL4;
 
 use Illuminate\Support\ServiceProvider;
 
-class FixtureServiceProvider extends ServiceProvider {
+class FixtureL4ServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -18,7 +18,7 @@ class FixtureServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('codesleeve/fixture');
+		$this->package('codesleeve/fixture-l4');
 	}
 
 	/**
@@ -28,9 +28,18 @@ class FixtureServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$this->app->singleton('repository', function() {
+			return new Repositories\IlluminateDatabaseRepository($this->app['db']);
+		});
+
 		$this->app->bind('fixture', function()
 		{
-		    return Fixture::getInstance($this->app['db'], $this->app['Str'], $this->app['config']->get('fixture::config'));
+		    $fixture = Fixture::getInstance();
+		    $fixture->setRepository($this->app['repository']);
+		    $fixture->setStr($this->app['Str']);
+		    $fixture->setConfig($this->app['config']->get('fixture-l4::config'));
+
+		    return $fixture;
 		});
 	}
 

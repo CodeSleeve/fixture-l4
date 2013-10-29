@@ -1,5 +1,5 @@
 {
-    "name": "codesleeve/fixture",
+    "name": "codesleeve/fixture-l4",
     "description": "A simple, easy to use fixture library for Laravel 4",
     "keywords": ["laravel", "fixture", "test", "database", "seed"],
     "license": "MIT",
