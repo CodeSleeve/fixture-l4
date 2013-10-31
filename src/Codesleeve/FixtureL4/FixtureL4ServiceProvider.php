@@ -29,14 +29,13 @@ class FixtureL4ServiceProvider extends ServiceProvider {
 	public function register()
 	{
 		$this->app->singleton('repository', function() {
-			return new Repositories\IlluminateDatabaseRepository($this->app['db']);
+			return new Repositories\IlluminateDatabaseRepository($this->app['db'], $this->app['Str']);
 		});
 
 		$this->app->bind('fixture', function()
 		{
 		    $fixture = Fixture::getInstance();
 		    $fixture->setRepository($this->app['repository']);
-		    $fixture->setStr($this->app['Str']);
 		    $fixture->setConfig($this->app['config']->get('fixture-l4::config'));
 
 		    return $fixture;

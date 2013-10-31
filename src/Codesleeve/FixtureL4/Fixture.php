@@ -1,7 +1,5 @@
 <?php namespace Codesleeve\FixtureL4;
 
-use Illuminate\Support\Str;
-
 class Fixture extends Singleton
 {
 	/**
@@ -16,7 +14,7 @@ class Fixture extends Singleton
 	 * 
 	 * @var array
 	 */
-	protected $tables;
+	protected $tables = [];
 
 	/**
      * The ORM specific database repository that's being used.
@@ -24,13 +22,6 @@ class Fixture extends Singleton
      * @var Repository
      */
     protected $repository;
-
-    /**
-     * An instance of Laravel's Str class.
-     * 
-     * @var Str
-     */
-    protected $str;
 
     /**
      * An array of configuration options.
@@ -91,28 +82,6 @@ class Fixture extends Singleton
 	public function getRepository()
 	{
 		return $this->repository;
-	}
-
-	/**
-	 * Setter method for the string processing library used by 
-	 * the fixture.
-	 * 
-	 * @param Str $str
-	 */
-	public function setStr(Str $str)
-	{
-		$this->str = $str;
-	}
-
-	/**
-	 * Getter method for the string processing library used by
-	 * the fixture.
-	 * 
-	 * @return Str 
-	 */
-	public function getStr()
-	{
-		return $this->str;
 	}
 
 	/**
@@ -220,25 +189,13 @@ class Fixture extends Singleton
 	protected function loadFixture($fixture)
 	{
 		$tableName = basename($fixture, '.php');
-		$model = $this->generateModelName($tableName);
 		$this->tables[] = $tableName;
 		$records = include $fixture;
 		
 		foreach ($records as $recordName => $recordValues) 
 		{
-			$record = $this->repository->buildRecord($model, $recordName, $recordValues);
+			$record = $this->repository->buildRecord($tableName, $recordName, $recordValues);
 			$this->fixtures[$tableName][$recordName] = $record;
 		}
-	}
-
-	/**
-	 * Generate the name of table's corresponding model.
-	 * 
-	 * @param  string $tableName 
-	 * @return string
-	 */
-	protected function generateModelName($tableName)
-	{
-		return $this->str->singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
 	}
 }

@@ -25,44 +25,73 @@ class FixtureTest extends PHPUnit_Framework_TestCase
 	public function testUpThrowsAnException()
 	{
 	    $mockedRepository = m::mock('Codesleeve\FixtureL4\Repositories\IlluminateDatabaseRepository');
-		$mockedStr = m::mock('Illuminate\Support\Str');
 
 		$fixture = Fixture::getInstance();
 		$fixture->setRepository($mockedRepository);
-		$fixture->setStr($mockedStr);
 		$fixture->up();
 	}
 
-	public function testUpPopulatesFixtures()
+	/**
+	 * Test that the up method will populate all fixtures when called
+	 * with an empty parameter list.
+	 * 
+	 * @return void
+	 */
+	public function testUpPopulatesAllFixtures()
 	{
 		$mockedRepository = m::mock('Codesleeve\FixtureL4\Repositories\IlluminateDatabaseRepository');
-		$mockedRepository->shouldReceive('buildRecord')->times(6);
-		
-		$mockedStr = m::mock('Illuminate\Support\Str');
-		$mockedStr->shouldReceive('singular')
+		$mockedRepository->shouldReceive('buildRecord')
 			->once()
-			->with('Users')
-			->andReturn('User');
+			->with('users', 'Travis', ['first_name' => 'Travis', 'last_name'  => 'Bennett','roles' => 'endUser, root'])
+			->andReturn('foo');
 
-		$mockedStr->shouldReceive('singular')
+		$mockedRepository->shouldReceive('buildRecord')
 			->once()
-			->with('Roles')
-			->andReturn('Role');
+			->with('games', 'Diablo3', ['title' => 'Diablo 3', 'user' => 'Travis'])
+			->andReturn('bar');
 
-		$mockedStr->shouldReceive('singular')
+		$mockedRepository->shouldReceive('buildRecord')
 			->once()
-			->with('Games')
-			->andReturn('Game');
+			->with('roles', 'root', ['name' => 'root'])
+			->andReturn('baz');
 
 		$fixture = Fixture::getInstance();
 		$fixture->setRepository($mockedRepository);
-		$fixture->setStr($mockedStr);
 		$fixture->setConfig(['location' => dirname(__FILE__) . '/fixtures']);
 		$fixture->up();
 
-		/*$this->assertEquals('Travis', $fixture->users('Travis')->first_name);
-		$this->assertEquals('Diablo 3', $fixture->users('Travis')->games[0]->title);
-		$this->assertEquals('Skyrim', $fixture->users('Travis')->games[1]->title);
-		$this->assertTrue($fixture->users('Travis')->hasRole('root'));*/
+		$this->assertEquals('foo', $fixture->users('Travis'));
+		$this->assertEquals('bar', $fixture->games('Diablo3'));
+		$this->assertEquals('baz', $fixture->roles('root'));
+	}
+
+	/**
+	 * Test that the up method will only populate fixtures that 
+	 * are supplied to it via parameters.
+	 * 
+	 * @return void
+	 */
+	public function testUpPopulatesSomeFixtures()
+	{
+		$mockedRepository = m::mock('Codesleeve\FixtureL4\Repositories\IlluminateDatabaseRepository');
+		$mockedRepository->shouldReceive('buildRecord')
+			->once()
+			->with('users', 'Travis', ['first_name' => 'Travis', 'last_name'  => 'Bennett','roles' => 'endUser, root'])
+			->andReturn('foo');
+
+		$mockedRepository->shouldReceive('buildRecord')
+			->never()
+			->with('games', 'Diablo3', ['title' => 'Diablo 3', 'user' => 'Travis']);
+
+		$mockedRepository->shouldReceive('buildRecord')
+			->never()
+			->with('roles', 'root', ['name' => 'root']);
+
+		$fixture = Fixture::getInstance();
+		$fixture->setRepository($mockedRepository);
+		$fixture->setConfig(['location' => dirname(__FILE__) . '/fixtures']);
+		$fixture->up(['users']);
+
+		$this->assertEquals('foo', $fixture->users('Travis'));
 	}
 }

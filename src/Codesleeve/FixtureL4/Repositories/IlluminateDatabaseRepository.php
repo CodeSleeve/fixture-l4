@@ -3,8 +3,9 @@
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
-class IlluminateDatabaseRepository implements RepositoryInterface
+class IlluminateDatabaseRepository extends Repository implements RepositoryInterface
 {
 	/**
      * An instance of Laravel's DatabaseManager class.
@@ -13,26 +14,36 @@ class IlluminateDatabaseRepository implements RepositoryInterface
      */
     protected $db;
 
+    /**
+     * An instance of Laravel's Str class.
+     * 
+     * @var Str
+     */
+    protected $str;
+
 	/**
 	 * Constructor method
 	 *
-	 * @param  $db 
+	 * @param  DatabaseManager $db 
+	 * @param  Str $str
 	 */
-	public function __construct(DatabaseManager $db)
+	public function __construct(DatabaseManager $db, Str $str)
 	{
 		$this->db = $db;
+		$this->str = $str;
 	}
 
 	/**
 	 * Build a fixture record using the passed in values.
-	 * 
-	 * @param  Model $model        
+	 *
+	 * @param  string $tableName
 	 * @param  string $recordName   
 	 * @param  mixed $recordValues 
 	 * @return Model             
 	 */
-	public function buildRecord($model, $recordName, $recordValues)
+	public function buildRecord($tableName, $recordName, $recordValues)
 	{
+		$model = $this->generateModelName($tableName);
 		$record = new $model;
 
 		foreach ($recordValues as $columnName => $columnValue) 
@@ -65,12 +76,12 @@ class IlluminateDatabaseRepository implements RepositoryInterface
 	/**
 	 * Truncate a table.
 	 * 
-	 * @param  string $table 
+	 * @param  string $tableName 
 	 * @return void           
 	 */
-	public function truncate($table)
+	public function truncate($tableName)
 	{
-		$this->db->table($table)->truncate();
+		$this->db->table($tableName)->truncate();
 	}
 
 	/**
@@ -141,18 +152,13 @@ class IlluminateDatabaseRepository implements RepositoryInterface
 	}
 
 	/**
-	 * Generate an integer hash of a string.
-	 * We'll use this method to convert a fixture's name into the
-	 * primary key of it's corresponding database table record.
+	 * Generate the name of table's corresponding model.
 	 * 
-	 * @param  string $value - This should be the name of the fixture.
-	 * @return integer      
+	 * @param  string $tableName 
+	 * @return string
 	 */
-	protected function generateKey($value)
+	protected function generateModelName($tableName)
 	{
-		$hash = sha1($value);
-		$integerHash = base_convert($hash, 16, 10);
-		
-		return (int)substr($integerHash, 0, 10);
+		return $this->str->singular(str_replace(' ', '', ucwords(str_replace('_', ' ', $tableName))));
 	}
 }
