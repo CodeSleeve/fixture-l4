@@ -6,17 +6,15 @@ interface RepositoryInterface {
 	 * Build a fixture record using the passed in values.
 	 *
 	 * @param  string $tableName
-	 * @param  string $recordName   
-	 * @param  mixed $recordValues 
+	 * @param  array $records   
 	 * @return Model             
 	 */
-	public function buildRecord($tableName, $recordName, $recordValues);
+	public function buildRecords($tableName, $records);
 
 	/**
 	 * Truncate a table.
 	 * 
-	 * @param  string $tableName 
 	 * @return void           
 	 */
-	public function truncate($tableName);
+	public function truncate();
 }

@@ -10,13 +10,6 @@ class Fixture extends Singleton
 	protected $fixtures;
 
 	/**
-	 * An array of tables that have had fixture data loaded into them.
-	 * 
-	 * @var array
-	 */
-	protected $tables = [];
-
-	/**
      * The ORM specific database repository that's being used.
      * 
      * @var Repository
@@ -54,12 +47,7 @@ class Fixture extends Singleton
 	 */
 	public function down()
 	{
-		foreach ($this->tables as $table) 
-		{
-			$this->repository->truncate($table);
-		}
-
-		$this->tables = [];
+		$this->repository->truncate();
 	}
 
 	/**
@@ -189,13 +177,7 @@ class Fixture extends Singleton
 	protected function loadFixture($fixture)
 	{
 		$tableName = basename($fixture, '.php');
-		$this->tables[] = $tableName;
 		$records = include $fixture;
-		
-		foreach ($records as $recordName => $recordValues) 
-		{
-			$record = $this->repository->buildRecord($tableName, $recordName, $recordValues);
-			$this->fixtures[$tableName][$recordName] = $record;
-		}
+		$this->fixtures[$tableName] = $this->repository->buildRecords($tableName, $records);
 	}
 }

@@ -3,6 +3,20 @@
 class StandardRepository extends Repository implements RepositoryInterface
 {
 	/**
+     * A PDO connection instance.
+     * 
+     * @var PDO
+     */
+    protected $db;
+
+    /**
+	 * An array of tables that have had fixture data loaded into them.
+	 * 
+	 * @var array
+	 */
+	protected $tables = [];
+
+	/**
 	 * Constructor method
 	 *
 	 * @param  PDO $db 
@@ -17,37 +31,47 @@ class StandardRepository extends Repository implements RepositoryInterface
 	 * Build a fixture record using the passed in values.
 	 *
 	 * @param  string $tableName
-	 * @param  string $recordName   
-	 * @param  mixed $recordValues 
+	 * @param  array $records   
 	 * @return Model             
 	 */
-	public function buildRecord($tableName, $recordName, $recordValues)
+	public function buildRecords($tableName, $records)
 	{
-		// Generate a hash for this record's primary key.  We'll simply hash the name of the 
-		// fixture into an integer value so that related fixtures don't have to rely on
-		// an auto-incremented primary key when creating foreign keys.
-		$recordValues = $this->setForeignKeys($recordValues);
-		$recordValues = array_merge($recordValues, array('id' => $this->generateKey($recordName)));
-		
-		$fields = implode(', ', array_keys($recordValues));
-		$values = array_values($recordValues);
-		$placeholders = rtrim(str_repeat('?, ', count($recordValues)), ', ');
-		$sql = "INSERT INTO $tableName ($fields) VALUES ($placeholders)";
-		$sth = $this->db->prepare($sql);
-		$sth->execute($values);
+		$insertedRecords = [];
+		$this->tables[$tableName] = $tableName;
 
-		return (object) $recordValues;
+		foreach ($records as $recordName => $recordValues) 
+		{
+			// Generate a hash for this record's primary key.  We'll simply hash the name of the 
+			// fixture into an integer value so that related fixtures don't have to rely on
+			// an auto-incremented primary key when creating foreign keys.
+			$recordValues = $this->setForeignKeys($recordValues);
+			$recordValues = array_merge($recordValues, array('id' => $this->generateKey($recordName)));
+			
+			$fields = implode(', ', array_keys($recordValues));
+			$values = array_values($recordValues);
+			$placeholders = rtrim(str_repeat('?, ', count($recordValues)), ', ');
+			$sql = "INSERT INTO $tableName ($fields) VALUES ($placeholders)";
+			$sth = $this->db->prepare($sql);
+			$sth->execute($values);
+
+			$insertedRecords[$recordName] = (object) $recordValues;
+		}
+
+		return $insertedRecords;
 	}
 
 	/**
 	 * Truncate a table.
 	 * 
-	 * @param  string $tableName 
 	 * @return void           
 	 */
-	public function truncate($tableName)
+	public function truncate()
 	{
-		$this->db->query("TRUNCATE TABLE $tableName");
+		foreach ($this->tables as $table) {
+			$this->db->query("TRUNCATE TABLE $table");
+		}
+
+		$this->tables = [];
 	}
 
 	/**

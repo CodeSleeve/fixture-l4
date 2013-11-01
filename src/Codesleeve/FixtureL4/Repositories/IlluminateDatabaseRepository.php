@@ -15,6 +15,13 @@ class IlluminateDatabaseRepository extends Repository implements RepositoryInter
     protected $db;
 
     /**
+	 * An array of tables that have had fixture data loaded into them.
+	 * 
+	 * @var array
+	 */
+	protected $tables = [];
+
+    /**
      * An instance of Laravel's Str class.
      * 
      * @var Str
@@ -37,51 +44,60 @@ class IlluminateDatabaseRepository extends Repository implements RepositoryInter
 	 * Build a fixture record using the passed in values.
 	 *
 	 * @param  string $tableName
-	 * @param  string $recordName   
-	 * @param  mixed $recordValues 
+	 * @param  array $records   
 	 * @return Model             
 	 */
-	public function buildRecord($tableName, $recordName, $recordValues)
+	public function buildRecords($tableName, $records)
 	{
-		$model = $this->generateModelName($tableName);
-		$record = new $model;
+		$insertedRecords = [];
+		$this->tables[$tableName] = $tableName;
 
-		foreach ($recordValues as $columnName => $columnValue) 
+		foreach ($records as $recordName => $recordValues)
 		{
-			$camelKey = camel_case($columnName);
+			$model = $this->generateModelName($tableName);
+			$record = new $model;
 
-			// If a column name exists as a method on the model, we will just assume
-		    // it is a relationship and we'll generate the primary key for it and store 
-			// it as a foreign key on the model.
-			if (method_exists($record, $camelKey))
+			foreach ($recordValues as $columnName => $columnValue) 
 			{
-				$this->insertRelatedRecords($recordName, $record, $camelKey, $columnValue);
+				$camelKey = camel_case($columnName);
 
-				continue;
+				// If a column name exists as a method on the model, we will just assume
+			    // it is a relationship and we'll generate the primary key for it and store 
+				// it as a foreign key on the model.
+				if (method_exists($record, $camelKey))
+				{
+					$this->insertRelatedRecords($recordName, $record, $camelKey, $columnValue);
+
+					continue;
+				}
+				
+				$record->$columnName = $columnValue;
 			}
-			
-			$record->$columnName = $columnValue;
+
+			// Generate a hash for this record's primary key.  We'll simply hash the name of the 
+			// fixture into an integer value so that related fixtures don't have to rely on
+			// an auto-incremented primary key when creating foreign keys.
+			$primaryKeyName = $record->getKeyName(); 
+			$record->$primaryKeyName = $this->generateKey($recordName);
+			$record->save();
+			$insertedRecords[$recordName] = $record;
 		}
 
-		// Generate a hash for this record's primary key.  We'll simply hash the name of the 
-		// fixture into an integer value so that related fixtures don't have to rely on
-		// an auto-incremented primary key when creating foreign keys.
-		$primaryKeyName = $record->getKeyName(); 
-		$record->$primaryKeyName = $this->generateKey($recordName);
-		$record->save();
-
-		return $record;
+		return $insertedRecords;
 	}
 
 	/**
 	 * Truncate a table.
 	 * 
-	 * @param  string $tableName 
 	 * @return void           
 	 */
-	public function truncate($tableName)
+	public function truncate()
 	{
-		$this->db->table($tableName)->truncate();
+		foreach ($this->tables as $table) {
+			$this->db->table($table)->truncate();
+		}
+
+		$this->tables = [];
 	}
 
 	/**
