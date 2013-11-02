@@ -12,7 +12,8 @@
     "require": {
         "php": ">=5.3.0",
         "illuminate/support": "4.0.x",
-        "illuminate/foundation": "4.0.*@dev"
+        "illuminate/foundation": "4.0.*@dev",
+        "codesleeve/fixture": "dev-master"
     },
     "require-dev": {
         "mockery/mockery": "dev-master"

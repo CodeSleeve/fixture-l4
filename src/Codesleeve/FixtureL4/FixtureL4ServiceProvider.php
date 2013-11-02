@@ -1,5 +1,7 @@
 <?php namespace Codesleeve\FixtureL4;
 
+use Codesleeve\Fixture\Fixture;
+use Codesleeve\Fixture\Repositories\IlluminateDatabaseRepository;
 use Illuminate\Support\ServiceProvider;
 
 class FixtureL4ServiceProvider extends ServiceProvider {
@@ -29,7 +31,7 @@ class FixtureL4ServiceProvider extends ServiceProvider {
 	public function register()
 	{
 		$this->app->singleton('repository', function() {
-			return new Repositories\IlluminateDatabaseRepository($this->app['db'], $this->app['Str']);
+			return new IlluminateDatabaseRepository($this->app['db'], $this->app['Str']);
 		});
 
 		$this->app->bind('fixture', function()
