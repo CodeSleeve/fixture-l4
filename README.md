@@ -1,4 +1,2 @@
-fixture-l4
-==========
-
-A simple (yet elegant) fixture library for Laravel 4
+#Fixture-L4
+A fixture libraray for the Laravel 4 framework.  
