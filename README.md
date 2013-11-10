@@ -79,7 +79,7 @@ return array (
 );
 ``` 
 
-### Step 2 - Invoke Fixture::up() inside your unit tests.
+### Step 2 - Invoke Fixture::up() and Fixture::down() inside your unit tests.
 Now that our fixtures have been created, all we need to do in order to load them into our database is to invoke the Fixture::up() method within our tests.  Consider the following test (we're using PHPUnit here, but the testing framework doesn't matter; SimpleTest would work just as well):
 
 in tests/exampleTest.php
@@ -104,7 +104,7 @@ in tests/exampleTest.php
 What's going on here?  A few things:
 * We're invoking the up() method on the fixture facade.  This method seeds the database and caches the inserted records as Eloquent objects that can be accessed via the Fixture facade.
 	* Invoking the up method with no params will seed all fixtures.
-	* Invoking the up method with an array of fixture names will seed only those fixtures (e.g $this->fixture->up(['soul_reapers']) would seed the soul_reapers table only).
+	* Invoking the up method with an array of fixture names will seed only those fixtures (e.g Fixture::up(array('soul_reapers')) would seed the soul_reapers table only).
 * In the tearDown method we're invoking the down() method.  This method will truncate all tables that have had fixture data inserted into them.
 
 Seeded database records can be accessed (if needed) as Eloquent objects directly from the fixture object itself:
