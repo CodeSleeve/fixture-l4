@@ -16,10 +16,16 @@ Install the package using Composer.  Edit your project's `composer.json` file to
   }
 ```
 
-Once this operation completes, the final step is to add the service provider. Open `app/config/app.php`, and add a new item to the providers array.
+Once this operation completes, add the service provider. Open `app/config/app.php`, and add a new item to the providers array.
 
 ```php
-    'Codesleeve\Stapler\FixtureServiceProvider'
+    'Codesleeve\FixtureL4\FixtureServiceProvider'
+```
+
+Finally, add the Fixture facade to the aliases array (still inside `app/config/app.php`).
+
+```php
+	'Fixture' => 'Codesleeve\FixtureL4\Facades\Fixture',
 ```
 
 ## Overview
@@ -78,6 +84,8 @@ return array (
 	)
 );
 ``` 
+
+Notice that once again we simpley reference the name of the relationship ('user' in this case) inside the fixture.  No need to add a 'user_id' field; Fixture is smart enough to look up the relationship ('belongsTo') via the user column and populate it with the correct foreign key value.  No need to worry about juggling foreign keys, no need to worry about the order in which records are created. 
 
 ### Step 2 - Invoke Fixture::up() and Fixture::down() inside your unit tests.
 Now that our fixtures have been created, all we need to do in order to load them into our database is to invoke the Fixture::up() method within our tests.  Consider the following test (we're using PHPUnit here, but the testing framework doesn't matter; SimpleTest would work just as well):
