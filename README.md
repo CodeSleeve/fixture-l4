@@ -19,7 +19,7 @@ Install the package using Composer.  Edit your project's `composer.json` file to
 Once this operation completes, add the service provider. Open `app/config/app.php`, and add a new item to the providers array.
 
 ```php
-    'Codesleeve\FixtureL4\FixtureServiceProvider'
+    'Codesleeve\FixtureL4\FixtureL4ServiceProvider'
 ```
 
 Finally, add the Fixture facade to the aliases array (still inside `app/config/app.php`).
