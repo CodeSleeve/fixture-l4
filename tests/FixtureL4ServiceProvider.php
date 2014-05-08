@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\App;
 use Codesleeve\FixtureL4\Facades\Fixture;
 
-class FixtureTest extends PHPUnit_Framework_TestCase
+class FixtureL4ServiceProviderTest extends PHPUnit_Framework_TestCase
 {
 	/**
      * setUp method.
