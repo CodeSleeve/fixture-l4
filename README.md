@@ -1,5 +1,13 @@
 #Fixture-L4
-A fixture libraray for the Laravel 4 framework.  
+[![Build Status](https://travis-ci.org/CodeSleeve/fixture-l4.png?branch=development)](https://travis-ci.org/CodeSleeve/fixture-l4)
+[![Latest Stable Version](https://poser.pugx.org/codesleeve/fixture-l4/v/stable.png)](https://packagist.org/packages/codesleeve/fixture-l4) 
+[![Total Downloads](https://poser.pugx.org/codesleeve/fixture-l4/downloads.png)](https://packagist.org/packages/codesleeve/fixture-l4) 
+[![Latest Unstable Version](https://poser.pugx.org/codesleeve/fixture-l4/v/unstable.png)](https://packagist.org/packages/codesleeve/fixture-l4) 
+[![License](https://poser.pugx.org/codesleeve/fixture-l4/license.png)](https://packagist.org/packages/codesleeve/fixture-l4)
+
+A fixture libraray for the Laravel 4 framework.
+
+Fixture was created by [Travis Bennett](https://twitter.com/tandrewbennett).  
 
 ## Requirements
 * Laravel >= 4
@@ -29,7 +37,7 @@ Finally, add the Fixture facade to the aliases array (still inside `app/config/a
 ```
 
 ## Overview
-This package is a simple wrapper for adding some L4 goodness to the existings codesleeve\fixture package that can be found [here](https://github.com/CodeSleeve/fixture).  
+This package is a simple wrapper for adding some L4 goodness to the existing codesleeve\fixture package that can be found [here](https://github.com/CodeSleeve/fixture).  I strongly encourage you to read over the documentation in that package, it goes in much more detail than I currently provide here.  This package is pretty much just a Facade registration and some object bootstrapping via service provider.
 
 ## Example
 ### Step 1 - Fixture setup
@@ -87,7 +95,7 @@ return array (
 
 Notice that once again we simpley reference the name of the relationship ('user' in this case) inside the fixture.  No need to add a 'user_id' field; Fixture is smart enough to look up the relationship ('belongsTo') via the user column and populate it with the correct foreign key value.  No need to worry about juggling foreign keys, no need to worry about the order in which records are created. 
 
-### Step 2 - Invoke Fixture::up() and Fixture::down() inside your unit tests.
+### Step 2 - Invoke Fixture::up() and Fixture::down() inside your tests.
 Now that our fixtures have been created, all we need to do in order to load them into our database is to invoke the Fixture::up() method within our tests.  Before this can happen though we need to make sure that the database tables themselves have been created (don't worry about seeding).  Regardless of how your test database is configured (mysql, sqlite, sqlite in memory, etc) you're going to need to run migrations (at least once) in order to initialize your test database with tables.  If you're using mysql, postresql, or sqlite, simple make a call to laravel's migrate command from the command line before running your tests.  However, if you're running an in memory sqlite database (which you probably should be), you're going to need to do this right before your tests start running.  One way of accomplishing this is to tap into the createApplication method of the base TestCase supplied with Laravel:
 
 ```php
@@ -136,7 +144,7 @@ in tests/exampleTest.php
 What's going on here?  A few things:
 * We're invoking the up() method on the fixture facade.  This method seeds the database and caches the inserted records as Eloquent objects that can be accessed via the Fixture facade.
 	* Invoking the up method with no params will seed all fixtures.
-	* Invoking the up method with an array of fixture names will seed only those fixtures (e.g Fixture::up(array('soul_reapers')) would seed the soul_reapers table only).
+	* Invoking the up method with an array of fixture names will seed only those fixtures (e.g Fixture::up(array('profiles')) would seed the profiles table only).
 * In the tearDown method we're invoking the down() method.  This method will truncate all tables that have had fixture data inserted into them.
 
 In your tests, seeded database records can be accessed (if needed) as Eloquent objects from the fixture facade:
@@ -151,4 +159,3 @@ echo Fixture::users('Kelt')->profile->state;
 // Returns 'Admin'
 echo Fixture::roles('admin')->name;
 ```
-By using fixtures to seed our test database we've gained very precise control over what's in our database at any given time during a test.  This in turn allows us to very easily test the pieces of our application that contain database specific logic. 
