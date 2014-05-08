@@ -78,14 +78,14 @@ in tests/fixtures/profiles.php
 return array (
 	'Travis Profile' => array (
 		'user' => 'Travis',
-		'email' => 'ktd_@hotmail.com',
+		'email' => 'travis@codesleeve.com',
 		'state' => 'AR',
 		'country' => 'US',
 		'bio' => 'Travis bio information goes here.'
 	),
 	'Kelt Profile' => array (
 		'user' => 'Kelt',
-		'email' => 'ktd_@hotmail.com',
+		'email' => 'kelt@codesleeve.com',
 		'state' => 'AR',
 		'country' => 'US',
 		'bio' =. 'Kelt bio information goes here.'
